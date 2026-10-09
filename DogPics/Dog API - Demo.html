@@ -1,0 +1,98 @@
+<!doctype html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang=""> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8" lang=""> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9" lang=""> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang=""> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Dog API - Demo</title>
+
+        <link rel="icon" type="image/png" href="/img/favicon.png" />
+
+        <meta name="description" content="Demo of Dog API. Fetching you over 20,000 dog images accessible by over 120 breeds. Image supplied by the Stanford Dogs Dataset.">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <meta property="og:url" content="https://dog.ceo/dog-api" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Dog API - Demo" />
+        <meta property="og:description"  content="Demo of Dog API. Over 20,000 images of dogs programmaticaly accessible by over 120 breeds. Image supplied by the Stanford Dogs Dataset." />
+        <meta property="og:image" content="https://dog.ceo/img/dog-api-fb.jpg" />
+
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="Dog API - Demo">
+        <meta name="twitter:description" content="Demo of Dog API. Over 20,000 images of dogs programmaticaly accessible by over 120 breeds. Image supplied by the Stanford Dogs Dataset.">
+        <meta name="twitter:image" content="https://dog.ceo/img/dog-api-fb.jpg">
+
+        	<style type="text/css">@font-face {font-family:'Karla';font-style:normal;font-weight:400;src:url(/cf-fonts/s/karla/5.2.8/latin-ext/400/normal.woff2);unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:'Karla';font-style:normal;font-weight:400;src:url(/cf-fonts/s/karla/5.2.8/latin/400/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Karla';font-style:normal;font-weight:700;src:url(/cf-fonts/s/karla/5.2.8/latin-ext/700/normal.woff2);unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:'Karla';font-style:normal;font-weight:700;src:url(/cf-fonts/s/karla/5.2.8/latin/700/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Ubuntu Mono';font-style:normal;font-weight:400;src:url(/cf-fonts/s/ubuntu-mono/5.2.8/cyrillic-ext/400/normal.woff2);unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;font-display:swap;}@font-face {font-family:'Ubuntu Mono';font-style:normal;font-weight:400;src:url(/cf-fonts/s/ubuntu-mono/5.2.8/greek-ext/400/normal.woff2);unicode-range:U+1F00-1FFF;font-display:swap;}@font-face {font-family:'Ubuntu Mono';font-style:normal;font-weight:400;src:url(/cf-fonts/s/ubuntu-mono/5.2.8/greek/400/normal.woff2);unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF;font-display:swap;}@font-face {font-family:'Ubuntu Mono';font-style:normal;font-weight:400;src:url(/cf-fonts/s/ubuntu-mono/5.2.8/latin/400/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Ubuntu Mono';font-style:normal;font-weight:400;src:url(/cf-fonts/s/ubuntu-mono/5.2.8/latin-ext/400/normal.woff2);unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:'Ubuntu Mono';font-style:normal;font-weight:400;src:url(/cf-fonts/s/ubuntu-mono/5.2.8/cyrillic/400/normal.woff2);unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;font-display:swap;}</style>
+	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+	<link rel="stylesheet" href="/css/main.css">
+
+    </head>
+    <body>
+        <!--[if lt IE 8]>
+            <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+
+    <div class="mobile-header">
+    <div class="mobile-menu">
+        <a href=""><i class="fa fa-navicon"></i></a>
+    </div>
+    <ul class="header-menu">
+        <li>
+            <img src="/img/dog-api-logo.svg" />
+        </li>
+        <li>
+            <a href="/dog-api">Dog API</a>
+        </li>
+    </ul>
+</div>
+<div class="vertical-nav">
+
+    <a class="no-border" href="/dog-api/"><img src="/img/dog-api-logo.svg" class="logo"></a>
+
+    <h1>Dog API</h1>
+
+    <ul>
+        <li><a href="/dog-api/documentation">Documentation</a></li>
+
+        <li><a href="/dog-api/breeds-list">Breeds list</a></li>
+        <li><a href="/dog-api/about">About</a></li>
+        <li><a href="https://github.com/jigsawpieces/dog-api-images#dog-api-images">Submit your dog</a></li>
+
+    </ul>
+
+    <div class="social">
+        <a href="https://paypal.me/elliottlan"><i class="fa fa-dollar"></i> Buy me a dog treat</a>
+        <a href="https://github.com/ElliottLandsborough/dog-ceo-api" target=""_blank><i class="fa fa-github"></i> View on GitHub</a>
+        <a href="https://twitter.com/dog__CEO" target="_blank"><i class="fa fa-twitter"></i> Follow on Twitter</a>
+        <a href="https://status.dog.ceo" target="_blank" rel="noopener"><img src="https://badge.uptimerobot.com/psp/b32358a0a8b111f3e775ba869029db53.svg?style=logo&theme=light" alt="dog.ceo"></a>
+    </div>
+</div>
+
+    <div class="api-side">
+
+        <h3>Breeds list</h3>
+
+        <div>
+            <div class="code-wrapper breeds">
+                <span class="code">https://dog.ceo/api/breed/<select class="dog-selector"></select>/images/random</span>
+                <a href='javascript:void(0);' class='get-dog button'>Fetch!</a>
+            </div>
+
+
+            <div class="demo-image"></div>
+        </div>
+
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="/js/main.js"></script>
+    <script src="/dog-api/demo.js"></script>
+
+    <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4bc70e2c01a94c73b74392e4234840661791215815920" integrity="sha512-L0ha0OXavK/8okipN9F8BtP84dg9DUhPERbBXzwI6dgTA55d2+yweo3pn5CSFYs45/r8md2+xvUPtTdvTNRfjA==" data-cf-beacon='{"version":"2024.11.0","token":"34f24b37c5894c7cbbbe5d5151b00bee","r":1,"spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>

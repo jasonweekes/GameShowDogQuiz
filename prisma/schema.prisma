@@ -1,0 +1,47 @@
+// Dog Quiz schema (Supabase Postgres) – one Game per quiz session, one TeamResult per team in that game.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Game {
+  id            Int          @id @default(autoincrement())
+  questionCount Int
+  createdAt     DateTime     @default(now())
+  results       TeamResult[]
+}
+
+model TeamResult {
+  id          Int      @id @default(autoincrement())
+  gameId      Int
+  game        Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  teamName    String
+  score       Int // points earned (hints reduce what a correct answer is worth)
+  total       Int // max possible points = questionCount * 3
+  correct     Int      @default(0) // questions answered correctly
+  hintsUsed   Int      @default(0)
+  timeSeconds Int
+  createdAt   DateTime @default(now())
+
+  @@index([score, timeSeconds])
+}
+
+// Chatbot knowledge base: one row per passage of a document in /docs, with its embedding.
+// The embedding column is a pgvector type, which Prisma can't read or write, so src/lib/vector.ts uses raw SQL for this table.
+model DocChunk {
+  id         Int                         @id @default(autoincrement())
+  source     String // file name, e.g. "02-scoring-and-hints.md"
+  title      String // the document's H1 title
+  heading    String // the section heading the passage came from
+  chunkIndex Int
+  content    String
+  embedding  Unsupported("vector(384)")
+  createdAt  DateTime                    @default(now())
+
+  @@unique([source, chunkIndex])
+}

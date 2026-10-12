@@ -1,6 +1,9 @@
 import { buildQuestions } from "@/lib/quiz";
 import { QUESTION_COUNTS } from "@/lib/types";
 
+// Fetching up to 25 dog photos in parallel can exceed a serverless host's ~10s default.
+export const maxDuration = 30;
+
 // GET /api/questions?count=10
 // Note: the correct answer is included in the response. That's fine for a
 // local class game, but a competitive deployment would verify answers server-side.

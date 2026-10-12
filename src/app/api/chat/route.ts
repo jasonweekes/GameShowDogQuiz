@@ -9,6 +9,9 @@ import { COMPANION_SOURCE, embedQuery, searchByVector, type Match } from "@/lib/
 //    Without a key (or if Claude is unavailable) we reply from the best passages themselves.
 // The matched passages are listed in the `x-sources` response header (URI-encoded JSON).
 
+// Streaming a Claude answer can take a while; without this a serverless host may cut it off at ~10s.
+export const maxDuration = 30;
+
 const MODEL = process.env.CHAT_MODEL ?? "claude-opus-5-5";
 const CONTEXT_MIN = 0.25; // passages at least this similar are given to Claude as reference
 const STRONG_MIN = 0.35; // a question counts as on-topic only if its best passage is at least this similar

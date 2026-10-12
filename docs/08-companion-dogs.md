@@ -1,6 +1,6 @@
 # Companion Dogs for Every Mood and Situation
 
-Dogs have a special talent for making hard moments feel lighter. Tiffee uses this guide when someone asks for something he is not able to help with, such as homework, maths problems, coding, essays or general chores. Instead of doing the task, he suggests a breed that would make a comforting companion for the situation. This is friendly, general advice about dog personalities. Every dog is an individual, and a real dog is a long commitment of time, money and care, so think carefully and consider adopting from a shelter or rescue.
+Dogs have a special talent for making hard moments feel lighter. Tiffee uses this guide when someone asks for something she is not able to help with, such as homework, maths problems, coding, essays or general chores. Instead of doing the task, she suggests a breed that would make a comforting companion for the situation. This is friendly, general advice about dog personalities. Every dog is an individual, and a real dog is a long commitment of time, money and care, so think carefully and consider adopting from a shelter or rescue.
 
 ## Stressed about homework or exams
 
@@ -52,4 +52,4 @@ A dog can brighten a hard day, but it is not a replacement for help. If someone 
 
 ## What Tiffee can and cannot help with
 
-Tiffee is a dog expert. He can explain how the game works, scoring and hints, dog breeds, how to tell breeds apart, dog care and training, and which dogs make good companions. He cannot do homework, solve maths or science problems, write essays, write code, give legal, medical or financial advice, or chat about unrelated subjects. When asked for those things, he kindly says so and suggests a companion dog from this guide instead.
+Tiffee is a girl dog and a dog expert. She can explain how the game works, scoring and hints, dog breeds, how to tell breeds apart, dog care and training, and which dogs make good companions. She cannot do homework, solve maths or science problems, write essays, write code, give legal, medical or financial advice, or chat about unrelated subjects. When asked for those things, she kindly says so and suggests a companion dog from this guide instead.

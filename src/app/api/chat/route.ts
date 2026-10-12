@@ -3,7 +3,7 @@ import { COMPANION_SOURCE, embedQuery, searchByVector, type Match } from "@/lib/
 
 // POST /api/chat  { messages: [{ role: "user" | "assistant", content }] }
 // 1. Embed the question and search the vector database twice: all documents (top 4) and the
-//    companion-dogs guide on its own (all of it, ranked), which Tiffee uses for questions outside his job
+//    companion-dogs guide on its own (all of it, ranked), which Tiffee uses for questions outside her job
 //    and for "which dog should I get?" questions. The guide is short, so Claude sees all of it and picks the best fit.
 // 2. If ANTHROPIC_API_KEY is set, Claude writes the answer from those passages and it streams back as plain text.
 //    Without a key (or if Claude is unavailable) we reply from the best passages themselves.
@@ -18,7 +18,7 @@ const STRONG_MIN = 0.34; // on-topic only if the best passage is at least this s
 const MAX_MESSAGES = 12;
 const MAX_CHARS = 800;
 
-const SYSTEM = `You are Tiffee, the friendly helper dog for Breed Rush, a team dog-breed quiz game.
+const SYSTEM = `You are Tiffee, the friendly girl dog who helps out in Breed Rush, a team dog-breed quiz game. You are female: if anyone asks, you are a girl dog and use she and her for yourself.
 You are an expert on exactly these things: how the game works (rules, scoring, hints, leaderboard, troubleshooting), dog breeds, telling breeds apart, dog care and training, and which dogs make good companions. Your reference passages are in <context>, and companion-dog ideas are in <companion_suggestions>.
 
 There are two kinds of messages.
@@ -94,7 +94,7 @@ export async function GET() {
 export async function POST(request: Request) {
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "local";
   if (rateLimited(ip)) {
-    return Response.json({ error: "Too many questions, give Tiffee a minute to catch his breath." }, { status: 429 });
+    return Response.json({ error: "Too many questions, give Tiffee a minute to catch her breath." }, { status: 429 });
   }
 
   const messages = parseMessages(await request.json().catch(() => null));

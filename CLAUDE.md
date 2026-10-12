@@ -254,7 +254,7 @@ Known limitation: `/api/questions` returns the correct answer to the browser, so
 
 ## Chatbot: Tiffee (built)
 
-A dog button in the bottom-right corner opens a chat panel. Hovering the button makes the cartoon dog run (legs, tail, ears and speed lines animate); it also runs while Tiffee is thinking. Tiffee is hidden on `/play` so he can't be used to look up answers during a live question.
+A dog button in the bottom-right corner opens a chat panel. Hovering the button makes the cartoon dog run (legs, tail, ears and speed lines animate); it also runs while Tiffee is thinking. Tiffee is hidden on `/play` so she can't be used to look up answers during a live question.
 
 **How it works (retrieval-augmented generation):**
 
@@ -264,9 +264,9 @@ A dog button in the bottom-right corner opens a chat panel. Hovering the button 
 4. **Embeddings:** `src/lib/embeddings.ts` calls the Voyage AI REST API (`voyage-4-lite`, 512 dimensions; `input_type` is `"document"` for stored passages and `"query"` for questions). Needs `VOYAGE_API_KEY`. It retries on 429/5xx; ingest waits it out, while chat queries try only twice so a player is not kept waiting. **Voyage free accounts without a payment method are limited to 3 requests and 10K tokens a minute**, which means about 3 chat questions a minute and a slow ingest; add a payment method in the Voyage dashboard to lift it (the free token allowance still applies). Vectors from different models cannot be compared, so changing the model or dimensions needs a migration that resizes the column plus a fresh `npm run ingest`.
 5. **Chat API:** `POST /api/chat` (`src/app/api/chat/route.ts`) embeds the question once and searches the vector database twice: the 4 closest passages across all documents, and the whole companion-dogs guide (`08-companion-dogs.md`, ranked). Passages scoring at least 0.25 (cosine similarity) go to Claude as reference; a question counts as **on-topic** only if its best passage scores at least 0.34 (measured with Voyage: real questions 0.36 and up, off-topic ones up to 0.31). Re-measure these cutoffs if the embedding model changes.
    - **On-topic** (game, breeds, dog care, training, choosing a dog): Claude answers from the passages only, in a few short sentences, streamed back as plain text.
-   - **Off-topic** (homework, maths, essays, code, weather, jokes...): Tiffee does **not** do the task. He says it is outside his job, shows a line of empathy, and recommends one or two breeds from the companion guide that suit the person's situation (calm study buddy for stress, a clown for boredom, a cuddly giant for loneliness...), then invites them back to the game or dogs. The prompt also tells him to switch to a warm, serious reply pointing to a trusted adult or helpline if someone shows real distress.
+   - **Off-topic** (homework, maths, essays, code, weather, jokes...): Tiffee does **not** do the task. She says it is outside her job, shows a line of empathy, and recommends one or two breeds from the companion guide that suit the person's situation (calm study buddy for stress, a clown for boredom, a cuddly giant for loneliness...), then invites them back to the game or dogs. The prompt also tells her to switch to a warm, serious reply pointing to a trusted adult or helpline if someone shows real distress.
    - Plain game or breed questions do not get dog recommendations (the companion guide is only sent for off-topic or choosing-a-dog questions).
-   - **No API key, or Claude errors:** Tiffee replies from the best passages himself; off-topic questions get the best-matching companion passage, or the all-round pick if nothing matches.
+   - **No API key, or Claude errors:** Tiffee replies from the best passages herself; off-topic questions get the best-matching companion passage, or the all-round pick if nothing matches.
    The passages used are returned in the `x-sources` header. `GET /api/chat` reports whether the AI is configured.
 6. **UI:** `src/components/ChatWidget.tsx` (panel, streaming, suggestion chips, source chips) and `src/components/DogRunner.tsx` (the SVG dog). Dog animation CSS is under "Tiffee the dog" in `globals.css`.
 

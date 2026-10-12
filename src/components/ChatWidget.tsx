@@ -66,7 +66,7 @@ export default function ChatWidget() {
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Tiffee is hidden during a live quiz so he can't be used to look up answers.
+  // Tiffee is hidden during a live quiz so she can't be used to look up answers.
   const hidden = pathname.startsWith("/play");
 
   useEffect(() => {

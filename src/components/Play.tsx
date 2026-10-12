@@ -3,6 +3,9 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import TieBreaker, { type TiedTeam } from "@/components/TieBreaker";
+import TimerRing from "@/components/TimerRing";
+import { hintNudge } from "@/data/breedGroups";
 import { fireConfetti } from "@/lib/confetti";
 import { loadSetup, saveFinished, type GameSetup } from "@/lib/session";
 import { playSfx } from "@/lib/sfx";
@@ -13,12 +16,14 @@ import {
   SECONDS_PER_QUESTION as LIMIT,
   type HintLevel,
   type Question,
+  type TieBreakResult,
 } from "@/lib/types";
 
-type Stage = "loading" | "error" | "intro" | "question" | "feedback";
+type Stage = "loading" | "error" | "intro" | "question" | "feedback" | "tiebreak";
 type Tally = { points: number; correct: number; hints: number; ms: number };
 
 const KEYS = ["A", "B", "C", "D"];
+const NO_QUESTIONS: Question[] = []; // stable empty list while the sets are still loading
 
 function shuffle<T>(items: readonly T[]): T[] {
   const a = [...items];
@@ -27,50 +32,6 @@ function shuffle<T>(items: readonly T[]): T[] {
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
-}
-
-/** A slight nudge: first letter plus the shape of the name. */
-function hintText(label: string) {
-  const words = label.split(" ").length;
-  const letters = label.replace(/ /g, "").length;
-  return `Starts with “${label[0].toUpperCase()}” · ${words} word${words > 1 ? "s" : ""} · ${letters} letters`;
-}
-
-function TimerRing({ remaining, paused }: { remaining: number; paused: boolean }) {
-  const r = 32;
-  const c = 2 * Math.PI * r;
-  const frac = Math.max(0, Math.min(1, remaining / LIMIT));
-  const tone = remaining > 8 ? "var(--cyan)" : remaining > 4 ? "var(--amber)" : "var(--bad)";
-  const urgent = remaining <= 4 && !paused;
-  return (
-    <div
-      role="timer"
-      aria-label={`${Math.ceil(remaining)} seconds left`}
-      className={`relative size-[4.75rem] ${urgent ? "animate-pulse-ring" : ""}`}
-    >
-      <svg viewBox="0 0 76 76" className="size-full -rotate-90 overflow-visible">
-        <circle cx="38" cy="38" r={r} fill="rgb(255 255 255 / 0.92)" stroke="rgb(40 36 100 / 0.12)" strokeWidth="6" />
-        <circle
-          cx="38"
-          cy="38"
-          r={r}
-          fill="none"
-          stroke={tone}
-          strokeWidth="6"
-          strokeLinecap="round"
-          strokeDasharray={c}
-          strokeDashoffset={c * (1 - frac)}
-          style={{ transition: "stroke 0.3s", filter: `drop-shadow(0 0 6px ${tone})` }}
-        />
-      </svg>
-      <span
-        className="font-display absolute inset-0 grid place-items-center text-2xl tabular-nums"
-        style={{ color: tone }}
-      >
-        {Math.ceil(remaining)}
-      </span>
-    </div>
-  );
 }
 
 function ScoreStrip({
@@ -110,7 +71,10 @@ function ScoreStrip({
 export default function Play() {
   const router = useRouter();
   const [setup, setSetup] = useState<GameSetup | null>(null);
-  const [questions, setQuestions] = useState<Question[]>([]);
+  // Every team has its own questions, so nobody can learn from another team's turn.
+  const [sets, setSets] = useState<Question[][]>([]);
+  const [tiebreak, setTiebreak] = useState<Question | null>(null);
+  const [tied, setTied] = useState<{ teams: TiedTeam[]; score: number } | null>(null);
   const [stage, setStage] = useState<Stage>("loading");
   const [error, setError] = useState("");
   const [team, setTeam] = useState(0);
@@ -138,7 +102,9 @@ export default function Play() {
     tickAt.current = now;
   }, []);
 
-  // Load the setup from the previous page, then fetch the questions once for all teams.
+  const questions = sets[team] ?? NO_QUESTIONS; // the current team's questions
+
+  // Load the setup from the previous page, then fetch a separate set of questions for each team.
   useEffect(() => {
     const controller = new AbortController();
     async function load() {
@@ -150,10 +116,11 @@ export default function Play() {
       setSetup(s);
       setTallies(s.teams.map(() => ({ points: 0, correct: 0, hints: 0, ms: 0 })));
       try {
-        const res = await fetch(`/api/questions?count=${s.count}`, { signal: controller.signal });
+        const res = await fetch(`/api/questions?count=${s.count}&teams=${s.teams.length}`, { signal: controller.signal });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error ?? "Could not load questions");
-        setQuestions(data.questions);
+        setSets(data.sets);
+        setTiebreak(data.tiebreak);
         setStage("intro");
       } catch (err) {
         if (controller.signal.aborted) return;
@@ -167,9 +134,9 @@ export default function Play() {
 
   // Warm the browser cache with the next photo so the next question appears instantly.
   useEffect(() => {
-    const next = questions[qi + 1];
+    const next = sets[team]?.[qi + 1];
     if (next) new window.Image().src = next.imageUrl;
-  }, [questions, qi]);
+  }, [sets, team, qi]);
 
   const answer = useCallback(
     (choice: string | null) => {
@@ -206,7 +173,7 @@ export default function Play() {
     if (level === 2) {
       const q = questions[qi];
       const wrong = q.options.filter((o) => o.value !== q.answer).map((o) => o.value);
-      setEliminated(shuffle(wrong).slice(0, 2));
+      setEliminated(shuffle(wrong).slice(0, 1)); // one wrong answer crossed out: a nudge, not a giveaway
     }
     setHint(level);
     setTallies((prev) => prev.map((t, i) => (i === team ? { ...t, hints: t.hints + 1 } : t)));
@@ -289,21 +256,40 @@ export default function Play() {
       setStage("intro");
       playSfx("click");
     } else {
-      saveFinished({
-        id: crypto.randomUUID(),
-        questionCount: questions.length,
-        results: setup.teams.map((teamName, i) => ({
-          teamName,
-          score: tallies[i].points,
-          total: questions.length * POINTS_PER_QUESTION,
-          correct: tallies[i].correct,
-          hintsUsed: tallies[i].hints,
-          timeSeconds: Math.round(tallies[i].ms / 1000),
-        })),
-      });
-      router.push("/results");
+      // Everyone has played. Teams level on the top score settle it with a buzzer round.
+      const top = Math.max(...tallies.map((t) => t.points));
+      const level = setup.teams
+        .map((name, index) => ({ index, name, seconds: Math.round(tallies[index].ms / 1000) }))
+        .filter((t) => tallies[t.index].points === top);
+      if (level.length >= 2 && tiebreak) {
+        setTied({ teams: level, score: top });
+        setStage("tiebreak");
+        playSfx("fanfare");
+      } else {
+        finishGame();
+      }
     }
-  }, [setup, qi, questions.length, team, tallies, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setup, qi, questions.length, team, tallies, tiebreak, router]);
+
+  /** Save the finished game for the results page (and the leaderboard) and go there. */
+  function finishGame(tieBreak?: TieBreakResult) {
+    if (!setup) return;
+    saveFinished({
+      id: crypto.randomUUID(),
+      questionCount: questions.length,
+      results: setup.teams.map((teamName, i) => ({
+        teamName,
+        score: tallies[i].points,
+        total: questions.length * POINTS_PER_QUESTION,
+        correct: tallies[i].correct,
+        hintsUsed: tallies[i].hints,
+        timeSeconds: Math.round(tallies[i].ms / 1000),
+      })),
+      tieBreak,
+    });
+    router.push("/results");
+  }
 
   // Keyboard: A–D / 1–4 answer, H hint, P or Esc pause, Enter continues.
   useEffect(() => {
@@ -355,6 +341,17 @@ export default function Play() {
     );
   }
 
+  if (stage === "tiebreak" && tied && tiebreak) {
+    return (
+      <TieBreaker
+        teams={tied.teams}
+        question={tiebreak}
+        score={tied.score}
+        onDone={(r) => finishGame({ teams: tied.teams.map((t) => t.name), winner: r.winner, reason: r.reason })}
+      />
+    );
+  }
+
   const teamName = setup.teams[team];
   const color = teamColor(team);
   const teamVars = { "--team": color } as CSSProperties;
@@ -399,7 +396,7 @@ export default function Play() {
             </li>
           </ul>
           <p className="relative mt-4 text-sm text-muted">
-            The clock starts when the photo appears. Hints cost points, and you can pause any time.
+            Your team has its own set of dogs. The clock starts when the photo appears. Hints cost points, and you can pause any time.
           </p>
 
           <button onClick={beginTurn} autoFocus className="btn btn-primary relative mt-8 w-full text-xl">
@@ -471,7 +468,7 @@ export default function Play() {
             )}
           </div>
           <div className="absolute left-4 top-4">
-            <TimerRing remaining={remaining} paused={paused} />
+            <TimerRing remaining={remaining} max={LIMIT} paused={paused} />
           </div>
           <div className="absolute right-4 top-4 rounded-full border border-line bg-white/85 px-3 py-1.5 text-sm font-extrabold backdrop-blur">
             Worth{" "}
@@ -538,9 +535,9 @@ export default function Play() {
                 </span>
               </div>
               {hint >= 1 && (
-                <p key={hint} className="animate-rise text-sm font-semibold text-cyan" aria-live="polite">
-                  💡 {hintText(answerLabel)}
-                  {hint >= 2 && <span className="text-muted"> · two wrong answers removed</span>}
+                <p key={hint} className="animate-rise text-sm italic text-muted" aria-live="polite">
+                  <span aria-hidden="true">💡</span> {hintNudge(q.answer)}
+                  {hint >= 2 && <> It starts with “{answerLabel[0].toUpperCase()}”.</>}
                 </p>
               )}
             </div>

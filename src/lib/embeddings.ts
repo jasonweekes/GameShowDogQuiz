@@ -37,7 +37,9 @@ async function embedBatch(texts: string[], kind: EmbedKind, maxAttempts: number)
       throw new Error(`Voyage embeddings failed (${res.status}): ${detail}`);
     }
     const retryAfter = Number(res.headers.get("retry-after"));
-    await sleep(Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 2000 * 2 ** (attempt - 1));
+    // Wait as long as Voyage asks, otherwise back off 2s, 4s, 8s... but never more than 25s at a time.
+    const waitMs = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 2000 * 2 ** (attempt - 1);
+    await sleep(Math.min(waitMs, 25_000));
   }
 }
 

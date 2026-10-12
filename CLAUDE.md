@@ -24,15 +24,15 @@ Setup on a fresh clone: `npm install`, copy `.env.example` to `.env` and fill in
 ## Game rules
 
 - Setup is a 3-step wizard: **1) number of questions** (5, 10, 15, 20), **2) number of teams** (1–4), **3) team names** (required, max 20 chars, unique; a "Surprise me" button suggests names).
-- Teams **take turns** on one screen; every team gets the **same questions**.
+- Teams **take turns** on one screen, and every team gets its **own questions**: no breed or photo repeats anywhere in the game, so nobody can learn from another team’s turn. One extra photo is held back for the tie-breaker.
 - **Scoring:** a correct answer is worth 3 points (`POINTS_PER_QUESTION`). Wrong or timed out = 0.
 - **Hints** (button or `H`) are taken out of the question's value, so a hint never makes a score negative:
-  - Hint 1 (slight, −1 pt → worth 2): first letter, word count and letter count of the breed.
-  - Hint 2 (bigger, −2 pts total → worth 1): also removes two wrong answers.
+  - Hint 1 (slight, −1 pt → worth 2): a gentle nudge about the kind of dog (its group: hound, terrier, herding...), never letters or the name. Text comes from `src/data/breedGroups.ts`. Shown as small, quiet text.
+  - Hint 2 (bigger, −2 pts total → worth 1): also shows the first letter and crosses out ONE wrong answer.
 - **Pause** (button, `P` or `Esc`): stops the clock and hides the photo and choices behind an overlay. Switching browser tabs auto-pauses. Paused time never counts toward a team's time.
 - 15 seconds per question. The clock starts when the photo has loaded. Running out counts as wrong (and costs the full 15s).
 - A team's total time = sum of its time per question (feedback and paused time are not counted).
-- Ranking: most points wins; a tie goes to the lower total time.
+- Ranking: most points wins. Teams level on the top score play a **tie-breaker** (`src/components/TieBreaker.tsx`): a fresh photo, a 3-2-1 countdown, then each tied team has a buzzer (tap, or press the team number). The first to buzz answers within 10s: right = wins; wrong or timed out = the next tied team may buzz (the wrong choice is crossed out); nobody right, or nobody buzzes within 20s = the lower total time wins; identical time = a tie. It does not change scores or what is saved to the database. The winner is passed to the results page as `tieBreak` (in `FinishedGame`).
 - Keyboard: `A`–`D` or `1`–`4` answer, `H` hint, `P`/`Esc` pause, `Enter`/`Space` continue after an answer.
 - Scores are saved to the database when the game ends and shown on `/leaderboard` (top 20).
 - Sound effects (Web Audio) can be muted from the header; the choice is kept in localStorage.
@@ -226,14 +226,15 @@ Source of truth in code: `src/data/breeds.ts`. Keep this table in sync with it.
 
 - `src/data/breeds.ts` – breed list, `QUIZ_BREEDS`, `breedLabel()`
 - `src/lib/dog.ts` – `breedPath()`, `getRandomImage()`
-- `src/lib/quiz.ts` – `buildQuestions(n)`: distinct answers, 3 distractors each (sometimes look-alikes sharing the first word, e.g. other terriers), extra candidates so one failed image doesn't break the quiz
+- `src/lib/quiz.ts` – `buildQuiz(count, teams)`: a separate question set per team plus one spare tie-breaker question; every answer breed and photo is distinct across the whole quiz. Each question gets 3 distractors (sometimes look-alikes sharing the first word, e.g. other terriers). Photos are fetched with 10 requests in flight and spare candidates cover failed ones.
 - `src/lib/types.ts` – shared constants (`MAX_TEAMS`, `QUESTION_COUNTS`, `SECONDS_PER_QUESTION`, `POINTS_PER_QUESTION`, `HINT_COSTS`) and types
 - `src/lib/sfx.ts` (synth sounds + mute), `src/lib/confetti.ts` (canvas confetti), `src/lib/teams.ts` (team colours, name ideas)
 - `src/lib/session.ts` – sessionStorage hand-off between setup → play → results
 - `src/lib/prisma.ts` – Prisma client (Postgres via `@prisma/adapter-pg`, connects with `DATABASE_URL`)
-- `src/app/api/questions/route.ts` – `GET ?count=N`
+- `src/app/api/questions/route.ts` – `GET ?count=N&teams=T` → `{ sets: Question[][], tiebreak: Question | null }` (no tie-breaker question for a solo game)
 - `src/app/api/scores/route.ts` – `POST` saves a game's team results, `GET` leaderboard
-- `src/components/Setup.tsx` (wizard), `Play.tsx` (timer, pause, hints, keyboard), `Results.tsx` (podium), `SoundToggle.tsx` – the game screens
+- `src/components/Setup.tsx` (wizard), `Play.tsx` (timer, pause, hints, keyboard), `TieBreaker.tsx` (buzzer round), `TimerRing.tsx`, `Results.tsx` (podium), `SoundToggle.tsx` – the game screens
+- `src/data/breedGroups.ts` – each breed’s group and the gentle hint text per group
 - `src/app/leaderboard/page.tsx` – server component reading the DB
 - `src/app/globals.css` – light theme (white base, orange + blue complements): design tokens, `.glass`, `.btn*`, `.choice`, `.answer`, animations. Display font is Fredoka (`font-display`), chosen because Bungee made "15s" look like "155".
 

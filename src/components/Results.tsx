@@ -75,12 +75,27 @@ export default function Results() {
     );
   }
 
-  // Most points wins; a tie goes to the faster team (original index kept for the team colour).
+  // Most points wins. Teams level on the top score were settled by the tie-breaker round: its winner
+  // goes first, then the usual rule (faster total time) orders everyone else.
+  const tieBreak = game.tieBreak;
+  const tbWinner = tieBreak?.winner ?? null;
   const ranked: Ranked[] = game.results
     .map((r, i) => ({ ...r, color: teamColor(i) }))
-    .sort((a, b) => b.score - a.score || a.timeSeconds - b.timeSeconds);
+    .sort(
+      (a, b) =>
+        b.score - a.score ||
+        Number(b.teamName === tbWinner) - Number(a.teamName === tbWinner) ||
+        a.timeSeconds - b.timeSeconds,
+    );
   const [top, second] = ranked;
-  const tied = !!second && second.score === top.score && second.timeSeconds === top.timeSeconds;
+  const tied = !tbWinner && !!second && second.score === top.score && second.timeSeconds === top.timeSeconds;
+  const stats = `${top.score} of ${top.total} points · ${top.correct}/${game.questionCount} correct · ${formatTime(top.timeSeconds)}`;
+  const winNote =
+    tieBreak?.winner && tieBreak.reason === "buzzer"
+      ? `Won the tie-breaker round. ${stats}`
+      : tieBreak?.winner && tieBreak.reason === "time"
+        ? `Won on fastest total time after the tie-breaker. ${stats}`
+        : stats;
   const solo = ranked.length === 1;
   const podium = ranked.slice(0, 3);
   // Visual order puts 1st in the middle: 2nd, 1st, 3rd.
@@ -96,9 +111,7 @@ export default function Results() {
           {tied ? "IT'S A TIE!" : top.teamName.toUpperCase()}
         </h1>
         <p className="mt-2 text-lg text-muted">
-          {tied
-            ? "Same points and the same time. Rematch?"
-            : `${top.score} of ${top.total} points · ${top.correct}/${game.questionCount} correct · ${formatTime(top.timeSeconds)}`}
+          {tied ? "Same points, same time, and the tie-breaker could not split them. Rematch?" : winNote}
         </p>
       </div>
 

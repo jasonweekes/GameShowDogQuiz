@@ -10,8 +10,10 @@ A correct answer is worth **3 points**. A wrong answer, or a question that times
 
 Stuck on a dog? Press the Hint button or the H key. A hint is paid for out of the value of that one question, so a score can never go below zero because of a hint.
 
-- **Hint 1 (the slight hint): costs 1 point.** It shows the first letter of the breed, how many words are in the name and how many letters it has. The question is now worth 2 points.
-- **Hint 2 (the bigger hint): costs 2 points in total, which is 1 more point.** It keeps the first hint on screen and also removes two of the wrong answers, leaving the right answer and one wrong one. The question is now worth 1 point.
+- **Hint 1 (the slight hint): costs 1 point.** It is a gentle nudge about what kind of dog it is, such as "bred to gather and move livestock" or "a pocket-sized companion". It never names the breed or any letters, so you still have to recognise the dog. The question is now worth 2 points.
+- **Hint 2 (the bigger hint): costs 2 points in total, which is 1 more point.** It keeps the first hint on screen, adds the first letter of the breed's name, and crosses out one of the wrong answers. The question is now worth 1 point.
+
+The hint text is small and quiet on purpose, so it does not give the answer away to everyone watching.
 
 A badge on the photo always shows how much the current question is worth: 3, 2 or 1 points. If you use a hint and still answer wrong, you simply earn 0 for that question. Using a hint always gives a worse result than answering correctly without one, but it is better than answering wrong.
 
@@ -26,8 +28,23 @@ Each team's total time is the sum of the time it spent on each question, measure
 ## Who wins
 
 1. The team with the **most points** wins.
-2. If two teams have the same points, the team with the **lower total time** wins.
-3. If points and time are both identical, the game is shown as a tie.
+2. If two or more teams are level on the top score, they play a **tie-breaker** (explained below). Its winner takes first place.
+3. If nobody gets the tie-breaker right, the team with the **lower total time** wins.
+4. Teams that are not in the tie are ordered by points, then by lower total time.
+5. If points and time are both identical and nobody settles it, the game is shown as a tie.
+
+## The tie-breaker round
+
+When teams finish level on the highest score, a special tie-breaker round starts before the results. It uses a brand-new dog photo that was not used in anyone's questions.
+
+1. The tied teams see the rules, then a 3, 2, 1 countdown.
+2. The photo appears and each tied team has a big **buzzer** button (or press the team's number on the keyboard). You have 20 seconds to buzz in.
+3. The **first team to tap its buzzer** gets to answer. It sees four breed choices and has 10 seconds to pick one.
+4. If it is **right, it wins** the game.
+5. If it is wrong, or runs out of time, the question passes to the other tied teams, who can buzz in. The wrong choice is crossed out for them.
+6. If **nobody gets it right**, or nobody buzzes, the team with the **fastest total time** wins.
+
+The tie-breaker photo is never one of the quiz questions, and the tie-breaker does not change any team's score. Only teams level on first place play it.
 
 ## The results screen
 

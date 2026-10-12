@@ -25,3 +25,10 @@ export type TeamResultInput = {
   hintsUsed: number;
   timeSeconds: number;
 };
+
+/** How a tie for first place was settled (see components/TieBreaker.tsx). */
+export type TieBreakResult = {
+  teams: string[]; // the teams that were level on points
+  winner: string | null; // null = still level after everything
+  reason: "buzzer" | "time" | "tie"; // won by answering the photo, by fastest total time, or still tied
+};

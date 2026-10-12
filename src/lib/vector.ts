@@ -61,7 +61,8 @@ export async function searchChunks(question: string, k = 4, source?: string): Pr
 export async function replaceDocuments(chunks: Chunk[]): Promise<void> {
   const vectors: number[][] = [];
   for (let i = 0; i < chunks.length; i += 16) {
-    vectors.push(...(await embed(chunks.slice(i, i + 16).map((c) => c.content), "document")));
+    // Ingest can wait out Voyage’s rate limit (3 requests a minute on accounts without a payment method).
+    vectors.push(...(await embed(chunks.slice(i, i + 16).map((c) => c.content), "document", 12)));
   }
 
   const client = await getPool().connect();

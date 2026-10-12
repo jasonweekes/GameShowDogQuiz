@@ -10,7 +10,7 @@ Each question asks the Dog CEO API (dog.ceo) for a random photo of a chosen bree
 
 ## How questions are built
 
-For each game the app picks different breeds at random, one per question, and fetches a photo for each. It then adds three wrong answers. Sometimes the wrong answers are look-alike breeds from the same family, for example other terriers, which makes a question harder. The four answers are shuffled, and every team in the game sees the same questions.
+For each game the app picks different breeds at random, one per question, and fetches a photo for each. Every team gets its own set of questions, and no breed or photo is repeated across the whole game, so a later team cannot learn from an earlier team's turn. One extra photo is held back for a tie-breaker. The app then adds three wrong answers to each question. Sometimes the wrong answers are look-alike breeds from the same family, for example other terriers, which makes a question harder. The four answers are shuffled.
 
 ## Where scores are stored
 

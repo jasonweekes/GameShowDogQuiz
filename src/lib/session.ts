@@ -1,4 +1,4 @@
-import type { TeamResultInput } from "@/lib/types";
+import type { TeamResultInput, TieBreakResult } from "@/lib/types";
 
 // The game hands data between pages via sessionStorage (per browser tab, gone when closed).
 export type GameSetup = { teams: string[]; count: number };
@@ -6,6 +6,7 @@ export type FinishedGame = {
   id: string; // unique per finished game, used to avoid saving the same game twice
   questionCount: number;
   results: TeamResultInput[];
+  tieBreak?: TieBreakResult; // set when teams were level on points and a tie-breaker was played
   saved?: boolean;
 };
 

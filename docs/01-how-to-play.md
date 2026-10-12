@@ -14,7 +14,7 @@ When all names are valid, press "Start the showdown".
 
 ## Taking turns
 
-Teams play one after another on the same screen. Every team gets exactly the same questions in the same order, so the contest is fair. Before each team starts, a "you're up" screen shows the team name, how many dogs are in the round, the time limit and the points per question. Press "Let's go" when the team is ready.
+Teams play one after another on the same screen. Every team gets its **own set of different dogs**. No breed or photo is used twice in a game, so a team cannot learn anything by watching another team's turn, and nobody gets an advantage from going later. Before each team starts, a "you're up" screen shows the team name, how many dogs are in the round, the time limit and the points per question. Press "Let's go" when the team is ready.
 
 ## Answering a question
 
@@ -35,6 +35,10 @@ Press the Pause button, or the P or Escape key, to stop the clock. While the gam
 - **P** or **Escape**: pause and resume.
 - **Enter** or **Space**: continue after an answer.
 
+## Tie-breaker
+
+If two or more teams finish level on the top score, a tie-breaker round is played before the results. A fresh photo appears and the tied teams race to tap their buzzer. The first team to buzz picks the breed: if it is right it wins, and if it is wrong the other team gets a chance. If nobody gets it right, the fastest total time wins. See the scoring guide for the full rules.
+
 ## When the game ends
 
-After the last team finishes the last question, the results screen shows an animated podium, the winner and a table with points, correct answers, hints used and time for every team. The scores are saved to the leaderboard automatically. Scores are only saved when a game reaches the results screen, so quitting from the pause menu or closing the browser early does not record anything.
+After the last team finishes the last question (and any tie-breaker), the results screen shows an animated podium, the winner and a table with points, correct answers, hints used and time for every team. The scores are saved to the leaderboard automatically. Scores are only saved when a game reaches the results screen, so quitting from the pause menu or closing the browser early does not record anything.

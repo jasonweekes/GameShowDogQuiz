@@ -33,28 +33,54 @@ function pickDistractors(answer: Breed, count = 3): Breed[] {
   return [...chosen, ...rest.slice(0, count - chosen.length)];
 }
 
-/**
- * Build `count` questions with distinct answer breeds. We start a few extra
- * candidates so a failed image fetch doesn't leave the quiz short.
- */
-export async function buildQuestions(count: number): Promise<Question[]> {
-  const candidates = shuffle(QUIZ_BREEDS).slice(0, count + 5);
-  const settled = await Promise.allSettled(
-    candidates.map(async (breed) => ({
-      breed,
-      imageUrl: await getRandomImage(breed.value),
-    })),
+/** Fetch one photo per breed with a few requests in flight at a time (kind to dog.ceo). */
+async function fetchPhotos(breeds: Breed[], concurrency = 10) {
+  const results: ({ breed: Breed; imageUrl: string } | null)[] = new Array(breeds.length).fill(null);
+  let next = 0;
+  await Promise.all(
+    Array.from({ length: Math.min(concurrency, breeds.length) }, async () => {
+      while (next < breeds.length) {
+        const i = next++;
+        try {
+          results[i] = { breed: breeds[i], imageUrl: await getRandomImage(breeds[i].value) };
+        } catch {
+          results[i] = null; // that breed's photo failed; the spare candidates cover for it
+        }
+      }
+    }),
   );
+  return results.flatMap((r) => (r ? [r] : []));
+}
 
-  const good = settled.flatMap((r) => (r.status === "fulfilled" ? [r.value] : []));
-  if (good.length < count) {
+export type Quiz = {
+  /** One list of questions per team. No breed or photo appears twice anywhere in the quiz. */
+  sets: Question[][];
+  /** One extra question, never shown in the sets, held back for a tie-breaker (null for a solo game). */
+  tiebreak: Question | null;
+};
+
+/**
+ * Build a quiz where every team gets its OWN questions, so a team can't learn from watching another
+ * team's turn. All answer breeds are distinct across the whole quiz. We start a few spare candidates so
+ * a failed photo doesn't leave the quiz short.
+ */
+export async function buildQuiz(count: number, teams: number): Promise<Quiz> {
+  const needTiebreak = teams > 1;
+  const total = count * teams + (needTiebreak ? 1 : 0);
+
+  const candidates = shuffle(QUIZ_BREEDS).slice(0, total + 8);
+  const photos = await fetchPhotos(candidates);
+  if (photos.length < total) {
     throw new Error("Could not load enough dog pictures. Please try again.");
   }
 
-  return good.slice(0, count).map(({ breed, imageUrl }, i) => ({
+  const questions: Question[] = photos.slice(0, total).map(({ breed, imageUrl }, i) => ({
     id: i,
     imageUrl,
     answer: breed.value,
     options: shuffle([breed, ...pickDistractors(breed)]).map(toOption),
   }));
+
+  const sets = Array.from({ length: teams }, (_, t) => questions.slice(t * count, (t + 1) * count));
+  return { sets, tiebreak: needTiebreak ? questions[total - 1] : null };
 }

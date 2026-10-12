@@ -34,7 +34,7 @@ export const COMPANION_SOURCE = "08-companion-dogs.md";
 
 /** Turn a question into the vector used for searching (do this once, then search as often as needed). */
 export async function embedQuery(question: string): Promise<number[]> {
-  const [vec] = await embed([question]);
+  const [vec] = await embed([question], "query", 2);
   return vec;
 }
 
@@ -61,7 +61,7 @@ export async function searchChunks(question: string, k = 4, source?: string): Pr
 export async function replaceDocuments(chunks: Chunk[]): Promise<void> {
   const vectors: number[][] = [];
   for (let i = 0; i < chunks.length; i += 16) {
-    vectors.push(...(await embed(chunks.slice(i, i + 16).map((c) => c.content))));
+    vectors.push(...(await embed(chunks.slice(i, i + 16).map((c) => c.content), "document")));
   }
 
   const client = await getPool().connect();

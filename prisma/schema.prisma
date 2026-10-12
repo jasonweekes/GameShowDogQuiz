@@ -40,7 +40,7 @@ model DocChunk {
   heading    String // the section heading the passage came from
   chunkIndex Int
   content    String
-  embedding  Unsupported("vector(384)")
+  embedding  Unsupported("vector(512)")
   createdAt  DateTime                    @default(now())
 
   @@unique([source, chunkIndex])

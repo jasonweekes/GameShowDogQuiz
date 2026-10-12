@@ -28,6 +28,7 @@ Environment variables (`.env`, never committed):
 | `DATABASE_URL` | Supabase **transaction pooler** string (port 6543). Used by the running app. |
 | `DIRECT_URL` | Supabase **session pooler** string (port 5432). Used by Prisma migrations. |
 | `ANTHROPIC_API_KEY` | Lets Tiffee write answers with Claude. Optional: without it Tiffee shows the best matching passages. |
+| `VOYAGE_API_KEY` | Voyage AI key for Tiffee's document search (embeddings). Needed for `npm run ingest` and the chatbot. Accounts without a payment method are limited to 3 requests a minute. |
 | `CHAT_MODEL` | Optional. Claude model for Tiffee (default `claude-opus-5-5`). |
 
 Use the Supabase **pooler** hosts (`aws-0-<region>.pooler.supabase.com`); the direct `db.<ref>.supabase.co` host is IPv6-only and fails on many networks.

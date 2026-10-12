@@ -14,7 +14,7 @@ export const maxDuration = 30;
 
 const MODEL = process.env.CHAT_MODEL ?? "claude-opus-5-5";
 const CONTEXT_MIN = 0.25; // passages at least this similar are given to Claude as reference
-const STRONG_MIN = 0.35; // a question counts as on-topic only if its best passage is at least this similar
+const STRONG_MIN = 0.34; // on-topic only if the best passage is at least this similar (measured with Voyage: real questions 0.36+, off-topic up to 0.31)
 const MAX_MESSAGES = 12;
 const MAX_CHARS = 800;
 
@@ -114,7 +114,7 @@ export async function POST(request: Request) {
     companion = comp;
   } catch (err) {
     console.error("chat: vector search failed", err);
-    return Response.json({ error: "Tiffee can't reach his notes right now. Try again in a moment." }, { status: 503 });
+    return Response.json({ error: "Tiffee is a little busy and couldn't look that up. Please try again in a few seconds." }, { status: 503 });
   }
 
   // Nothing matched the game or dogs well: probably an off-topic question, so show the companion source.

@@ -1,4 +1,4 @@
-// npm run ingest - reads docs/*.md, splits them into passages, embeds them locally and
+// npm run ingest - reads docs/*.md, splits them into passages, embeds them with Voyage AI and
 // stores them in the Supabase vector database (table "DocChunk"). Safe to re-run any time.
 import "dotenv/config";
 import { readdirSync, readFileSync } from "node:fs";
@@ -22,7 +22,7 @@ async function main() {
     chunks.push(...doc);
   }
 
-  console.log(`Embedding ${chunks.length} passages locally (the first run downloads a ~25MB model)...`);
+  console.log(`Embedding ${chunks.length} passages with Voyage AI...`);
   await replaceDocuments(chunks);
   console.log(`Done. ${await countChunks()} passages from ${files.length} documents are in the vector database.`);
 }

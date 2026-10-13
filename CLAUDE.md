@@ -261,6 +261,8 @@ Known limitation: `/api/questions` returns the correct answer to the browser, so
 
 ## Chatbot: Tiffee (built)
 
+**Persona:** Tiffee is a girl dog, 9 years old, a mixed breed (chow chow, rottweiler and American Staffordshire terrier plus a few others). She mentions this only when asked and cares about dogs of every age. It lives in the `SYSTEM` prompt in `src/app/api/chat/route.ts` and in `docs/08-companion-dogs.md` (so the answer can be found when Claude is off); re-run `npm run ingest` after editing the doc.
+
 A dog button in the bottom-right corner opens a chat panel. Hovering the button makes the cartoon dog run (legs, tail, ears and speed lines animate); it also runs while Tiffee is thinking. Tiffee is hidden on `/play` so she can't be used to look up answers during a live question.
 
 **How it works (retrieval-augmented generation):**

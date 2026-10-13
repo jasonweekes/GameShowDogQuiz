@@ -12,6 +12,8 @@ A team sees a dog photo from the [Dog CEO API](https://dog.ceo/dog-api/) and pic
 npm run dev                  # dev server on http://localhost:3000
 npm run build && npm start   # production build
 npm run lint
+npm test                     # unit tests (Vitest): leaderboard list, /api/scores route, game ticket
+npm run test:watch           # re-run tests on every save
 npx prisma migrate deploy    # apply existing migrations to the Supabase database
 npx prisma migrate dev       # create a new migration after changing schema.prisma
 npx prisma generate          # regenerate client into src/generated/prisma (gitignored)
@@ -35,6 +37,7 @@ Setup on a fresh clone: `npm install`, copy `.env.example` to `.env` and fill in
 - Ranking: most points wins. Teams level on the top score play a **tie-breaker** (`src/components/TieBreaker.tsx`): a fresh photo, a 3-2-1 countdown, then each tied team has a buzzer (tap, or press the team number). The first to buzz answers within 10s: right = wins; wrong or timed out = the next tied team may buzz (the wrong choice is crossed out); nobody right, or nobody buzzes within 20s = the lower total time wins; identical time = a tie. It does not change scores or what is saved to the database. The winner is passed to the results page as `tieBreak` (in `FinishedGame`).
 - Keyboard: `A`–`D` or `1`–`4` answer, `H` hint, `P`/`Esc` pause, `Enter`/`Space` continue after an answer.
 - Scores are saved to the database when the game ends and shown on `/leaderboard` (top 20).
+- **Saving is checked on the server** (`src/app/api/scores/route.ts`): `/api/questions` hands out a signed **game ticket** (`src/lib/gameToken.ts`, HMAC, valid 3 hours) and `/api/scores` only saves results that carry it, for that question count and team count, after at least 1 s per question across all teams. Each team's numbers must also be consistent (`correct` ≤ score ≤ 3 × `correct`, score ≥ 3 × `correct` − hints, hints ≤ 2 per question, time between half a second and 15 s per question). Cross-site posts and non-JSON bodies are refused, and `/api/questions` and `/api/scores` are rate limited per client (30 per 10 minutes). The ticket cannot prove the answers were honest (see "Known limitation" below) and a ticket can be reused until it expires.
 - Sound effects (Web Audio) can be muted from the header; the choice is kept in localStorage.
 
 ## Dog API reference
@@ -231,8 +234,12 @@ Source of truth in code: `src/data/breeds.ts`. Keep this table in sync with it.
 - `src/lib/sfx.ts` (synth sounds + mute), `src/lib/confetti.ts` (canvas confetti), `src/lib/teams.ts` (team colours, name ideas)
 - `src/lib/session.ts` – sessionStorage hand-off between setup → play → results
 - `src/lib/prisma.ts` – Prisma client (Postgres via `@prisma/adapter-pg`, connects with `DATABASE_URL`)
-- `src/app/api/questions/route.ts` – `GET ?count=N&teams=T` → `{ sets: Question[][], tiebreak: Question | null }` (no tie-breaker question for a solo game)
-- `src/app/api/scores/route.ts` – `POST` saves a game's team results, `GET` leaderboard
+- `src/app/api/questions/route.ts` – `GET ?count=N&teams=T` → `{ sets: Question[][], tiebreak: Question | null, token: string | null }` (no tie-breaker question for a solo game; `token` is the game ticket)
+- `src/app/api/scores/route.ts` – `POST` saves a game's team results (needs the ticket, see Game rules), `GET` leaderboard
+- `src/components/ScoreList.tsx` – the leaderboard table (medals, stats line, empty state); `src/app/leaderboard/page.tsx` only fetches the top 20 and passes them in
+- Tests live next to the code as `*.test.ts(x)` and run with `npm test` (`vitest.config.mts`): `ScoreList.test.tsx`, `src/app/api/scores/route.test.ts` (database replaced by spies), `src/lib/gameToken.test.ts`. They need no database, network or API keys.
+- `src/lib/ratelimit.ts` – `clientKey()` (trusted client address) and `createRateLimiter()` (in-memory, size-capped), used by all three API routes
+- `src/lib/gameToken.ts` – `issueGameToken()` / `verifyGameToken()`, signed with `GAME_TOKEN_SECRET` or, if unset, a key derived from `DATABASE_URL`
 - `src/components/Setup.tsx` (wizard), `Play.tsx` (timer, pause, hints, keyboard), `TieBreaker.tsx` (buzzer round), `TimerRing.tsx`, `Results.tsx` (podium), `SoundToggle.tsx` – the game screens
 - `src/data/breedGroups.ts` – each breed’s group and the gentle hint text per group
 - `src/app/leaderboard/page.tsx` – server component reading the DB
@@ -270,6 +277,6 @@ A dog button in the bottom-right corner opens a chat panel. Hovering the button 
    The passages used are returned in the `x-sources` header. `GET /api/chat` reports whether the AI is configured.
 6. **UI:** `src/components/ChatWidget.tsx` (panel, streaming, suggestion chips, source chips) and `src/components/DogRunner.tsx` (the SVG dog). Dog animation CSS is under "Tiffee the dog" in `globals.css`.
 
-**Claude settings:** model is `claude-opus-5-5` by default; set `CHAT_MODEL` in `.env` to change it (for example `claude-haiku-5-5` is much cheaper for simple Q&A). Effort is `low`, and the server-side refusal fallback (`fallbacks: "default"`) is on. A small in-memory rate limit allows 20 questions a minute per client.
+**Claude settings:** model is `claude-haiku-5-5` by default (the cheapest; this endpoint is public and has no login); set `CHAT_MODEL` in `.env` to change it (`claude-opus-5-5` answers better but costs about 40 times as much). Effort is `low` and replies are capped at 1024 output tokens (thinking counts toward that cap; if it eats the whole cap, Tiffee answers from the passages). The server-side refusal fallback (`fallbacks: "default"`) is sent only for models that support it: Haiku has none. Claude only sees the top 5 companion passages plus the all-round pick. Limits: 20 questions a minute per client (`src/lib/ratelimit.ts`, which counts the address your host adds, not the first `x-forwarded-for` value the caller can write), and at most `CHAT_DAILY_LIMIT` (default 1500) Claude answers a day per server instance, after which Tiffee answers from the passages. Both are in memory, so on serverless also set spend limits in the Anthropic console.
 
 **Deploying:** the embeddings are an HTTP API call, so Tiffee works on serverless hosts such as Vercel (set `DATABASE_URL`, `DIRECT_URL`, `ANTHROPIC_API_KEY` and `VOYAGE_API_KEY` in the host's environment settings). The in-memory rate limit in `/api/chat` is per server instance, so on serverless it is only a loose guard. GitHub Pages cannot host this app (static files only).

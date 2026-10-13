@@ -94,6 +94,7 @@ export default function Play() {
   const tickAt = useRef<number | null>(null);
   const answered = useRef(false);
   const lastBeep = useRef(0);
+  const gameToken = useRef<string | null>(null); // signed ticket from /api/questions, sent along when the scores are saved
 
   const flush = useCallback(() => {
     if (tickAt.current === null) return;
@@ -121,6 +122,7 @@ export default function Play() {
         if (!res.ok) throw new Error(data.error ?? "Could not load questions");
         setSets(data.sets);
         setTiebreak(data.tiebreak);
+        gameToken.current = data.token ?? null;
         setStage("intro");
       } catch (err) {
         if (controller.signal.aborted) return;
@@ -277,6 +279,7 @@ export default function Play() {
     if (!setup) return;
     saveFinished({
       id: crypto.randomUUID(),
+      token: gameToken.current ?? undefined,
       questionCount: questions.length,
       results: setup.teams.map((teamName, i) => ({
         teamName,

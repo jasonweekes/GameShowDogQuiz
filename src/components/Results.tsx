@@ -51,7 +51,7 @@ export default function Results() {
       const res = await fetch("/api/scores", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ questionCount: g.questionCount, results: g.results }),
+        body: JSON.stringify({ token: g.token, questionCount: g.questionCount, results: g.results }),
       });
       if (!res.ok) throw new Error();
       saveFinished({ ...g, saved: true }); // remember so a page reload doesn't save it again

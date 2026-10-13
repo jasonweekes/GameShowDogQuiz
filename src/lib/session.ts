@@ -4,6 +4,7 @@ import type { TeamResultInput, TieBreakResult } from "@/lib/types";
 export type GameSetup = { teams: string[]; count: number };
 export type FinishedGame = {
   id: string; // unique per finished game, used to avoid saving the same game twice
+  token?: string; // signed game ticket from /api/questions; the server won't save the scores without it
   questionCount: number;
   results: TeamResultInput[];
   tieBreak?: TieBreakResult; // set when teams were level on points and a tie-breaker was played
